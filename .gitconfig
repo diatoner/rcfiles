@@ -1,0 +1,27 @@
+[user]
+	name = tom
+	email = tom@additiveassurance.com
+[alias]
+    tree = log --graph --decorate --pretty=oneline --abbrev-commit
+    a = add
+    d = diff
+    c = commit
+    cc = commit --amend
+    p = push
+    r = pull  # Memnonic: retrieve
+    m = merge
+    f = fetch
+    n = checkout -b
+    co = checkout
+    s = status
+    l = !tig
+    b = branch
+    edit-config = !vim ~/.gitconfig
+[core]
+	editor = vim
+[credential]
+	helper = store
+[merge]
+    tool = vimdiff
+    conflictstyle = diff3
+    prompt = false
