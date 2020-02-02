@@ -1,6 +1,5 @@
 [user]
 	name = tom
-	email = tom@additiveassurance.com
 [alias]
     tree = log --graph --decorate --pretty=oneline --abbrev-commit
     a = add
