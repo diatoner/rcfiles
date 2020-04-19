@@ -56,12 +56,76 @@ if [ -n "$force_color_prompt" ]; then
     fi
 fi
 
-if [ "$color_prompt" = yes ]; then
-    PS1='${debian_chroot:+($debian_chroot)}\[\033[01;32m\]\u@\h\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\]\$ '
-else
-    PS1='${debian_chroot:+($debian_chroot)}\u@\h:\w\$ '
-fi
-unset color_prompt force_color_prompt
+DIRECTORY="\w"
+DOUBLE_SPACE="  "
+NEWLINE="\n"
+NO_COLOUR="\e[00m"
+PRINTING_OFF="\["
+PRINTING_ON="\]"
+YELLOW="\e[0;33m"
+GREEN="\e[0;32m"
+RED="\e[0;31m"
+BLUE="\e[0;34m"
+USER="\u"
+HOST="\h"
+PS1_PROMPT="\$"
+PS2_PROMPT=">"
+RESTORE_CURSOR_POSITION="\e[u"
+SAVE_CURSOR_POSITION="\e[s"
+SINGLE_SPACE=" "
+TIMESTAMP="\A"
+TIMESTAMP_PLACEHOLDER="--:--"
+
+move_cursor_to_start_of_ps1() {
+    command_rows=$(history 1 | wc -l)
+    if [ "$command_rows" -gt 1 ]; then
+        let vertical_movement=$command_rows+1
+    else
+        command=$(history 1 | sed 's/^\s*[0-9]*\s*//')
+        command_length=${#command}
+        ps1_prompt_length=${#PS1_PROMPT}
+        let total_length=$command_length+$ps1_prompt_length
+        let lines=$total_length/${COLUMNS}+1
+        let vertical_movement=$lines+1
+    fi
+    tput cuu $vertical_movement
+}
+
+PS0_ELEMENTS=(
+    "$SAVE_CURSOR_POSITION" "\$(move_cursor_to_start_of_ps1)"
+    "$PROMPT_COLOUR" "$TIMESTAMP" "$NO_COLOUR" "$RESTORE_CURSOR_POSITION"
+)
+PS0=$(IFS=; echo "${PS0_ELEMENTS[*]}")
+
+PS1_ELEMENTS=(
+    # Empty line after last command.
+    "$NEWLINE"
+    # First line of prompt.
+    "$PRINTING_OFF"
+    "$YELLOW"
+    "$PRINTING_ON" "$TIMESTAMP_PLACEHOLDER" "$DOUBLE_SPACE" "$PRINTING_OFF"
+    "$GREEN"
+    "$PRINTING_ON" "$USER" "$PRINTING_OFF"
+    "$NO_COLOUR"
+    "$PRINTING_ON" "@" "$PRINTING_OFF"
+    "$RED"
+    "$PRINTING_ON" "$HOST" "$PRINTING_OFF"
+    "$BLUE"
+    "$PRINTING_ON" "$DOUBLE_SPACE" "$DIRECTORY" "$PRINTING_OFF"
+    "$NO_COLOUR"
+    "$PRINTING_ON" "$NEWLINE" "$PS1_PROMPT" "$SINGLE_SPACE" "$PRINTING_OFF"
+    "$NO_COLOUR"
+    "$PRINTING_ON"
+)
+PS1=$(IFS=; echo "${PS1_ELEMENTS[*]}")
+
+PS2_ELEMENTS=(
+    "$PRINTING_OFF" "$PROMPT_COLOUR" "$PRINTING_ON" "$PS2_PROMPT"
+    "$SINGLE_SPACE" "$PRINTING_OFF" "$NO_COLOUR" "$PRINTING_ON"
+)
+PS2=$(IFS=; echo "${PS2_ELEMENTS[*]}")
+
+shopt -s histverify
 
 # If this is an xterm set the title to user@host:dir
 case "$TERM" in
